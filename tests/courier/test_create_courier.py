@@ -1,29 +1,28 @@
-import allure
 import pytest
 
 import response_constants
-from helpers import generate_random_string, create_courier
+from helpers import *
 
 
 class TestCreateCourier:
     @allure.title('Проверка успешной регистрации курьера.')
     @allure.description('Если переданы корректные данные для регистрации - курьер создается успешно.')
-    def test_random_data_new_courier_created(self, generate_info_for_courier):
+    def test_random_data_new_courier_created(self, generate_courier_and_delete):
         data = {
-            'login': generate_info_for_courier[0],
-            'password': generate_info_for_courier[1],
-            'name': generate_info_for_courier[2]
+            'login': generate_courier_and_delete[0],
+            'password': generate_courier_and_delete[1],
+            'name': generate_courier_and_delete[2]
         }
         response = create_courier(data)
         assert response.status_code == 201 and response.json() == response_constants.SUCCESSFUL_REQUEST
 
     @allure.title('Проверка повторной регистрации существующего курьера.')
     @allure.description('Если переданы дубли при регистрации - получим ошибку.')
-    def test_existing_user_conflict(self, generate_info_for_courier_and_register):
+    def test_existing_user_conflict(self, generate_courier_register_and_delete):
         data = {
-            'login': generate_info_for_courier_and_register[0],
-            'password': generate_info_for_courier_and_register[1],
-            'firstName': generate_info_for_courier_and_register[2]
+            'login': generate_courier_register_and_delete[0],
+            'password': generate_courier_register_and_delete[1],
+            'firstName': generate_courier_register_and_delete[2]
         }
         response = create_courier(data)
         assert response.status_code == 409 and response.json()['message'] == response_constants.CONFLICT_MESSAGE
@@ -37,4 +36,5 @@ class TestCreateCourier:
                                       ({'name': generate_random_string(10)})])
     def test_without_login_and_password_not_enough_data(self, data):
         response = create_courier(data)
-        assert response.status_code == 400 and response.json()['message'] == response_constants.NOT_ENOUGH_TO_CREATE_MESSAGE
+        assert response.status_code == 400 and response.json()[
+            'message'] == response_constants.NOT_ENOUGH_TO_CREATE_MESSAGE

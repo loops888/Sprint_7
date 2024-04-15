@@ -1,17 +1,16 @@
-import allure
 import pytest
 
 import response_constants
-from helpers import login_courier, generate_random_string
+from helpers import *
 
 
 class TestLoginCourier:
     @allure.title('Проверка успешного логина курьера.')
     @allure.description('Если переданы обязательные поля существующего курьера - логин успешен.')
-    def test_existed_courier_return_id(self, generate_info_for_courier_and_register):
+    def test_existed_courier_return_id(self, generate_courier_register_and_delete):
         data = {
-            'login': generate_info_for_courier_and_register[0],
-            'password': generate_info_for_courier_and_register[1]
+            'login': generate_courier_register_and_delete[0],
+            'password': generate_courier_register_and_delete[1]
         }
         response = login_courier(data)
         assert response.status_code == 200 and 'id' in response.text
@@ -38,9 +37,9 @@ class TestLoginCourier:
 
     @allure.title('Проверка логина без указания пароля.')
     @allure.description('Если неправильно указан password - получим ошибку.')
-    def test_wrong_password_data_not_found(self, generate_info_for_courier_and_register):
+    def test_wrong_password_data_not_found(self, generate_courier_register_and_delete):
         data = {
-            'login': generate_info_for_courier_and_register[0],
+            'login': generate_courier_register_and_delete[0],
             'password': generate_random_string(10)
         }
         response = login_courier(data)
@@ -48,10 +47,10 @@ class TestLoginCourier:
 
     @allure.title('Проверка логина без указания пользователя.')
     @allure.description('Если неправильно указан login - получим ошибку.')
-    def test_wrong_login_data_not_found(self, generate_info_for_courier_and_register):
+    def test_wrong_login_data_not_found(self, generate_courier_register_and_delete):
         data = {
-            'login': f'{generate_info_for_courier_and_register[0]}{1}',
-            'password': generate_info_for_courier_and_register[1]
+            'login': f'{generate_courier_register_and_delete[0]}{1}',
+            'password': generate_courier_register_and_delete[1]
         }
         response = login_courier(data)
         assert response.status_code == 404 and response.json()['message'] == response_constants.NOT_FOUND_MESSAGE
